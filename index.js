@@ -1,50 +1,46 @@
 const net = require('net');
+const fs = require('fs');
 
-const server = net.createServer(
-    // (clt) => {
-    //     clt.on('data', (d) => {
-    //         console.log('from the first one')
-    //     })
-    // }
-)
+const server = net.createServer();
 
 server.on('error', err => {
     throw err;
 })
 
-server.on('connection', (clt) => {
-    console.log('client connected')
+server.on('connection', (socket) => {
+    console.log('Socket connected')
 
-    clt.on('data', (d) => {
-        console.log('got some data ...', d)
+    socket.on('data', (d) => {
         let converted = d.toString('utf8');
-            console.log('converted to str', converted)
-            console.log(converted.slice(0, 3))
-            if (converted.slice(0, 3) === 'GET') {
-                console.log('nice HTTP request', converted)
-                // here send an index.html page
-                //clt.write(d)
-                clt.write('<p>Hello that a p</p>\r\n')
-                clt.end();
+        let date = new Date().toUTCString();
+
+        if (converted.slice(0, 3) === 'GET') {
+            if (converted.slice(4,5) === '/') {
+                let indexFile = fs.readFileSync('index.html', 'utf8');
+
+                socket.write('HTTP/1.1 200 OK\r\n')
+                socket.write('Content-Type: text/html; charset=UTF-8\r\n')
+                socket.write(`Date: ${date}\r\n`)
+                socket.write('Content-Length: 347\r\n\n')
+                socket.write(indexFile)
             }
-        
+            socket.end();
+        }
     })
-    clt.on('close', () => {
-        console.log('client disconnected closing')
-    })
-    clt.on('error', () => {
-        console.log('some error')
+
+    socket.on('error', () => {
+        console.log('Error in the socket')
         throw err;
+    })
+
+    socket.on('close', () => {
+        console.log('Socket disconnected')
     })
     
 })
 
-// server.on('data', (data, clt) => {
-//     console.log('some data on the server', data); 
-// })
-
 server.listen('3000', () => {
-    console.log('listening on port 3000')
+    console.log('Listening on port 3000')
 })
 
 
