@@ -21,7 +21,7 @@ server.on('connection', (socket) => {
                 socket.write('HTTP/1.1 200 OK\r\n')
                 socket.write('Content-Type: text/html; charset=UTF-8\r\n')
                 socket.write(`Date: ${date}\r\n`)
-                socket.write('Content-Length: 347\r\n\n')
+                socket.write(`Content-Length: ${indexFile.length}\r\n\n`)
                 socket.write(indexFile)
             }
             socket.end();
